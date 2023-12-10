@@ -39,9 +39,19 @@ pub struct XButtonEvent {
 }
 
 #[repr(C)]
+pub struct XMotionEvent {
+	evtype: i64, serial: u64, 
+	send_event: CBool, diplay: Display,
+    window: Window, root: Window, subwindow: Window,
+    time: u64, pub x: i32, pub y: i32, x_root: i32, y_root: i32, // 72
+    state: u32, pub button: u32, is_hint: u8, same_screen: CBool
+}
+
+#[repr(C)]
 pub enum XEvent<'a> {
     ButtonPress(&'a XButtonEvent),
     ButtonRelease(&'a XButtonEvent),
+    Motion(&'a XMotionEvent),
     _Raw(&'a [u32;48])
 }
 
@@ -52,6 +62,7 @@ impl<'a> XEvent<'a> {
                 .and_then(|rf| match *rf {
                     4 => Some(Self::ButtonPress(&*(ptr as *const XButtonEvent))),
                     5 => Some(Self::ButtonRelease(&*(ptr as *const XButtonEvent))),
+                    6 => Some(Self::Motion(&*(ptr as *const XMotionEvent))),
                     _ => None
                 })
         }

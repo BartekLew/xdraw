@@ -36,15 +36,7 @@ void main_loop(void)
         if(accept_event(&tool, &event))
             continue;
 
-        printf("> %x\n", STATE(&tool)->holding);
 		switch (event.type) {
-		case MotionNotify:
-			if (STATE(&tool)->holding) {
-                printf("Still drawin!");
-				tool_draw(&tool, event.xbutton.x, event.xbutton.y);
-            }
-			break;
-
 		case LeaveNotify:
 			LOG("User leave for the moment");
 			break;

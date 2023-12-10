@@ -19,7 +19,6 @@ extern "C" {
 pub extern "C" fn accept_event(tool: *mut Tool, ptr: *const Void) -> CBool {
     match XEvent::from_ptr(ptr) {
         Some(XEvent::ButtonPress(be)) => {
-            println!("Button press {}!", be.button);
             if be.button == 1 {
                 maybe_mut_ref(tool)
                      .map(|tool| {
@@ -28,13 +27,16 @@ pub extern "C" fn accept_event(tool: *mut Tool, ptr: *const Void) -> CBool {
                      });
                     
             }
-            maybe_ref(tool).map(|t| println!("holding: {}", t.holding));
             CBool::True
         }, Some(XEvent::ButtonRelease(be)) => {
-            println!("Button release!");
             if be.button == 1 {
                 maybe_mut_ref(tool)
                      .map(|tool| tool.holding = 0);
+            }
+            CBool::True
+        }, Some(XEvent::Motion(me)) => {
+            if let Some(state) = maybe_mut_ref(tool) {
+                unsafe { tool_draw(state, me.x, me.y) };
             }
             CBool::True
         }, _ => CBool::False
