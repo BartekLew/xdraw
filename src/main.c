@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include <X11/Xlib.h>
 #include <X11/XKBlib.h>
@@ -14,7 +15,9 @@
 #include "../include/utils.h"
 #include "../include/kbinds.h"
 
-void loop(void)
+extern bool accept_event(Tool *tool, XEvent *ev);
+
+void main_loop(void)
 {
 	XEvent event;
 	Tool tool = {0};
@@ -29,20 +32,17 @@ void loop(void)
 	int quit = 0;
 	while (!quit) {
 		XNextEvent(dp, &event);
+
+        if(accept_event(&tool, &event))
+            continue;
+
+        printf("> %x\n", STATE(&tool)->holding);
 		switch (event.type) {
-		case ButtonPress:
-			if (event.xbutton.button == Button1)
-				tool_draw(&tool, event.xbutton.x, event.xbutton.y);
-			STATE(&tool)->holding = 1;
-			break;
-			
-		case ButtonRelease:
-			STATE(&tool)->holding = 0;
-			break;
-			
 		case MotionNotify:
-			if (STATE(&tool)->holding)
+			if (STATE(&tool)->holding) {
+                printf("Still drawin!");
 				tool_draw(&tool, event.xbutton.x, event.xbutton.y);
+            }
 			break;
 
 		case LeaveNotify:
@@ -82,21 +82,3 @@ void loop(void)
 	/* Free the tools */
 	free_tool(&tool);
 }
-
-int main(void)
-{
-	open_display();
-	init_canvas();
-	
-	LOG("Running the app");
-	loop();
-	
-	del_canvas();
-	close_display();
-	LOG("Quiting");
-
-	return 0;
-}
-
-
-

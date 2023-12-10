@@ -22,7 +22,6 @@ INLCUDE_DIR = include
 BUILD_DIR = build
 PROGNAME = paint.out
 
-MAIN = $(addprefix $(BUILD_DIR)/, $(PROGNAME))
 OBJ_DIR = $(addprefix $(BUILD_DIR)/, obj)
 LIB_DIR = $(addprefix $(BUILD_DIR)/, lib)
 
@@ -30,7 +29,10 @@ OBJS = $(addprefix $(OBJ_DIR)/, window.o graphics.o main.o colors.o tools.o canv
 LIBS = $(addprefix $(LIB_DIR)/, libpaint.a)
 
 .PHONY: all clean run
-all: $(BUILD_DIR) $(OBJ_DIR) $(OBJS) $(LIB_DIR) $(LIBS) $(MAIN)
+all: $(BUILD_DIR) $(OBJ_DIR) $(OBJS) $(LIB_DIR) $(LIBS) build/xdraw
+
+build/xdraw: $(LIBS)
+	RUSTFLAGS='-L build/lib/ -l paint -lX11 -lXft' cargo build 2>&1 | perl rustline.pl
 
 $(OBJ_DIR):
 	mkdir -p $@
@@ -64,33 +66,7 @@ $(TESTRUNNER): $(basename $(TESTRUNNER)).c $(LIBS)
 	$(C) $(C_FALGS) $< -o $@ $(C_TEST_LIB_FLAGS)
 
 clean:
-ifneq ("$(wildcard $(OBJ_DIR)/*.o)", "")
-	rm $(wildcard $(OBJ_DIR)/*.o)
-endif
-
-ifneq ("$(wildcard $(OBJ_DIR))", "")
-	rmdir $(OBJ_DIR)
-endif
-
-ifneq ("$(wildcard $(MAIN))", "")
-	rm $(MAIN)
-endif
-
-ifneq ("$(wildcard $(PROGNAME)*)", "")
-	rm $(PROGNAME)*
-endif
-
-ifneq ("$(wildcard $(LIB_DIR)/*.a)", "")
-	rm $(wildcard $(LIB_DIR)/*.a)
-endif
-
-ifneq ("$(wildcard $(LIB_DIR))", "")
-	rmdir $(LIB_DIR)
-endif
-
-ifneq ("$(wildcard $(TESTRUNNER))", "")
-	rm $(TESTRUNNER)
-endif
+	rm -r target build
 
 clean-build:
 ifneq ("$(wildcard $(BUILD_DIR))", "")

@@ -87,4 +87,3 @@ void tool_draw(Tool *tool, int x, int y)
 	STATE(tool)->prev_x = x;
 	STATE(tool)->prev_y = y;
 }
-
