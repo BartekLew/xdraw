@@ -48,10 +48,30 @@ pub struct XMotionEvent {
 }
 
 #[repr(C)]
+pub struct XExposeEvent {
+	evtype: i64, serial: u64, 
+	send_event: CBool, diplay: Display,
+    window: Window, root: Window, subwindow: Window,
+    time: u64, pub x: i32, pub y: i32, width: i32, height: i32,
+    count:i32
+}
+
+#[repr(C)]
+pub struct XConfigureEvent {
+	evtype: i64, serial: u64, 
+	send_event: CBool, diplay: Display,
+    event: Window, window: Window,
+    pub x: i32, pub y: i32, pub width: i32, pub height: i32,
+	border_width: i32, above: Window, override_redirect: CBool
+}
+
+#[repr(C)]
 pub enum XEvent<'a> {
     ButtonPress(&'a XButtonEvent),
     ButtonRelease(&'a XButtonEvent),
     Motion(&'a XMotionEvent),
+    Expose(&'a XExposeEvent),
+    Configure(&'a XConfigureEvent),
     _Raw(&'a [u32;48])
 }
 
@@ -63,6 +83,8 @@ impl<'a> XEvent<'a> {
                     4 => Some(Self::ButtonPress(&*(ptr as *const XButtonEvent))),
                     5 => Some(Self::ButtonRelease(&*(ptr as *const XButtonEvent))),
                     6 => Some(Self::Motion(&*(ptr as *const XMotionEvent))),
+                    12 => Some(Self::Expose(&*(ptr as *const XExposeEvent))),
+                    22 => Some(Self::Configure(&*(ptr as *const XConfigureEvent))),
                     _ => None
                 })
         }

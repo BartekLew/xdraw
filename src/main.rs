@@ -13,6 +13,11 @@ extern "C" {
     fn close_display();
     fn main_loop();
     fn tool_draw(tool: &mut Tool, x: i32, y: i32);
+    fn refresh_canvas();
+    fn resize_canvas(x: i32, y: i32);
+
+    static canv_width: i32;
+    static canv_height: i32;
 }
 
 #[no_mangle]
@@ -39,7 +44,18 @@ pub extern "C" fn accept_event(tool: *mut Tool, ptr: *const Void) -> CBool {
                 unsafe { tool_draw(state, me.x, me.y) };
             }
             CBool::True
-        }, _ => CBool::False
+        }, Some(XEvent::Expose(_)) => {
+            unsafe { refresh_canvas() };
+            CBool::True
+        }, Some(XEvent::Configure(cfg)) => {
+            unsafe {
+                println!("{}x{}", cfg.width, cfg.height);
+                if canv_width != cfg.width || canv_height != cfg.height {
+                    resize_canvas(cfg.width, cfg.height);
+                }
+            }
+            CBool::True
+        },_ => CBool::False
     }
 
 }

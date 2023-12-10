@@ -37,22 +37,6 @@ void main_loop(void)
             continue;
 
 		switch (event.type) {
-		case LeaveNotify:
-			LOG("User leave for the moment");
-			break;
-			
-		case Expose:
-			LOG("User arrive");
-			break;
-
-		case ConfigureNotify:
-			assert(event.xconfigure.width >= DEFAULT_MIN_WIDTH
-			       && event.xconfigure.height >= DEFAULT_MIN_HEIGHT
-			       && "Checking the configuration");
-			if (event.xconfigure.width != canv_width || event.xconfigure.height != canv_height)
-				resize_canvas(event.xconfigure.width, event.xconfigure.height);
-			break;
-
 		case ClientMessage:
 			if ((Atom) event.xclient.data.l[0] == wm_delete_window)
 				quit = 1;
@@ -63,12 +47,6 @@ void main_loop(void)
 			handle_keypress(keysym, &tool, &quit);
 			break;
 		}
-
-		/* Refresh the canvas */
-		if (event.type == ButtonRelease
-		    || event.type == Expose
-		    || (event.type == KeyPress && keysym == XK_c))
-			refresh_canvas();
 	}
 
 	/* Free the tools */
